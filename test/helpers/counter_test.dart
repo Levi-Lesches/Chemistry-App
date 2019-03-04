@@ -20,8 +20,8 @@ void testAttributes() {
 	testValues(counter, 1);
 
 	final List <String> elements = [];
-	for (MapEntry <String, int> entry in counter) 
-		elements.add (entry.key);
+	for (CounterEntry<String> entry in counter) 
+		elements.add (entry.value);
 	expect (elements, WORDS);		
 }	
 

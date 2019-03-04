@@ -5,14 +5,13 @@ class Counter <T> with IterableMixin <CounterEntry <T>> {
 	final Map <T, int> counter = {};
 
 	Counter ([_elements = const []]) {
-		// counter = {};
 		for (T element in _elements) {
 			if (!counter.containsKey(element)) counter [element] = 1;
 			else counter [element] += 1;
 		}
 	}
 
-	Counter.fromMap(map) {counter.addAll(map);}
+	Counter.fromMap(Map map) {counter.addAll(map.cast <T, int>());}
 
 	Counter operator * (int coefficient) {
 		for (T element in counter.keys) 
@@ -30,7 +29,6 @@ class Counter <T> with IterableMixin <CounterEntry <T>> {
 	void operator []= (T element, int value) {counter [element] = value;}
 
 	@override
-	// Iterator <MapEntry<T, int>> get iterator => counter.entries.iterator;
 	Iterator <CounterEntry<T>> get iterator => counter.entries.map (
 		(MapEntry<T, int> entry) => CounterEntry<T>(entry.key, entry.value)
 	).iterator;

@@ -3,6 +3,8 @@ import "element.dart";
 
 import "../helpers/counter.dart";
 
+int temp (Molecule molecule) => molecule.coefficient;
+
 class Side {
 	final String formula;
 	final Counter <Molecule> molecules;

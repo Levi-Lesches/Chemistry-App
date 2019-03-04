@@ -94,9 +94,9 @@ class Molecule {
 
 	Counter <String> getElementNames () {
 		final Counter <String> result = Counter();
-		for (final MapEntry <Element, int> entry in this.elements) {
-			final Element element = entry.key;
-			final int count = entry.value;
+		for (final CounterEntry<Element> entry in this.elements) {
+			final Element element = entry.value;
+			final int count = entry.count;
 			final String name = element.name;
 			result [name] = count;
 		}
