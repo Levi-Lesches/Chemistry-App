@@ -23,15 +23,16 @@ int boolToInt(bool value) => value ? 1 : 0;
 class Equation {
 	final Side left, right;
 	Element lastElement;
+	final String equation;
 
-	Equation._ (this.left, this.right) {verify();}
+	Equation._ (this.left, this.right, this.equation) {verify();}
 
 	factory Equation (String equation) {
 		final List<String> sides = equation.split(" --> ");
 		assert (sides.length == 2, "Equation recieved too many parts: $equation");
 		final Side _left = Side (sides [0]);
 		final Side _right = Side (sides [1]); 
-		return Equation._(_left, _right);
+		return Equation._(_left, _right, equation);
 	}
 
 	@override String toString() => "$left --> $right";
@@ -78,7 +79,7 @@ class Equation {
 		final Side side = sides [0], otherSide = sides [1];
 		final List<Molecule> molecules = side.molecules.elements.where(
 			(Molecule molecule) => molecule.elements.contains (element)
-		);
+		).toList();
 		sort<Molecule> (  // Prefer molecules that make other elements even
 			molecules,
 			(Molecule molecule) => molecule.elements.where (
@@ -113,6 +114,19 @@ class Equation {
 		);
 
 		return molecules [0]; 
+	}
+
+	void balance() {
+		int counter = 0;
+		while (!balanced) {
+			if (counter == 100) throw "Cannot balance $equation [$this]";
+			final Element _element = this.element;
+			final List<Side> sides = getSides (_element);
+			final Molecule molecule = getMolecule (sides, _element);
+			sides [0].increase(molecule);
+			lastElement = _element;
+			counter++;
+		}
 	}
 
 }

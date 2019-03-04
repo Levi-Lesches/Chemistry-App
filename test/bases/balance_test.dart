@@ -40,7 +40,7 @@ void testWorksheet() {
 		'SiO2 + HF --> SiF4 + H2O',
 		'C + O2 --> CO',
 		'KClO3 --> KCl + O2',
-		'KClO3 --> KClO4 + KCl'
+		'KClO3 --> KClO4 + KCl',
 		"Fe2(SO4)3 + KOH --> K2SO4 + Fe(OH)3",
 	];
 	for (final String input in equations) {
