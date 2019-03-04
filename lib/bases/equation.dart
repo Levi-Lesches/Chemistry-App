@@ -69,7 +69,7 @@ class Equation {
 					)
 				)
 			)
-		).length;
+		).length; 
 
 	Molecule getMolecule (Side side, Element element, bool even) {
 		List<Molecule> molecules = side.molecules.elements.where (
