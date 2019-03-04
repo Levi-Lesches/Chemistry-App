@@ -9,6 +9,7 @@ void testWorksheet() {
 	final List<String> equations = [
 		"H2 + O2 --> H2O",
 		"N2 + H2 --> NH3",
+		"N2 + H2O --> NH3 + NO",
 		"S8 + O2 --> SO3",
 		"N2 + O2 --> N2O",
 		"HgO --> Hg + O2",
