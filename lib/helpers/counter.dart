@@ -33,7 +33,6 @@ class Counter <T> with IterableMixin <CounterEntry <T>> {
 		(MapEntry<T, int> entry) => CounterEntry<T>(entry.key, entry.value)
 	).iterator;
 
-
 	@override
 	String toString() {
 		List <String> result = [];
@@ -44,11 +43,13 @@ class Counter <T> with IterableMixin <CounterEntry <T>> {
 	}
 
 	@override operator == (dynamic other) => (
-		other.runtimeType == Counter &&
+		other is Counter &&
 		this.counter == other.counter
 	);
 
 	@override int get hashCode => this.counter.hashCode;
+
+	@override bool contains(dynamic other) => elements.contains (other);
 }
 
 class CounterEntry<T> {

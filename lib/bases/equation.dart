@@ -32,6 +32,8 @@ class Equation {
 	@override String toString() => "$left --> $right";
 
 	void verify() {
+		print (left.elements);
+		print (right.elements);
 		if (
 			left.elements.any(
 				(CounterEntry<Element> element) => 
@@ -45,15 +47,19 @@ class Equation {
 
 	bool get balanced => left.elements == right.elements;
 
-	Element getDisplacedElement() => filter<Element> (
-		left.elements
+	Element getDisplacedElement() {
+		final List<Element> temp = left.elements
 			.where (
 				(CounterEntry<Element> element) => 
 					right.elements [element.value] != element.count)
 			.map ((CounterEntry<Element> element) => element.value)
-			.toList(),
-		(Element element) => element != lastElement
-	) [0];
+			.toList();
+		print ("$balanced -- ${left.elements}, ${right.elements}");
+		return filter<Element> (
+			temp, 
+			(Element element) => element != lastElement
+		) [0];
+	}
 
 	int getStableCount (Molecule molecule, Side otherSide) => 
 		molecule.elementsList.where(
@@ -71,7 +77,7 @@ class Equation {
 	Molecule getMolecule (Side side, Element element, bool even) {
 		List<Molecule> molecules = side.molecules.elements.where (
 			(Molecule molecule) => molecule.elementsList.contains (element)
-		);
+		).toList();
 
 		final Side otherSide = side == right ? left : right;
 		molecules.sort(
@@ -91,7 +97,8 @@ class Equation {
 
 		MoleculeCount preffered = moleculeCounts.firstWhere(
 			(MoleculeCount moleculeCount) => 
-				moleculeCount.count.isEven == even
+				moleculeCount.count.isEven == even,
+			orElse: () => moleculeCounts [0]
 		);
 		if (
 			preffered == null ||
