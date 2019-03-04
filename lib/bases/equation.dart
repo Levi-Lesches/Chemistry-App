@@ -3,17 +3,22 @@ import "element.dart";
 import "molecule.dart";
 import "../helpers/counter.dart";
 
+// Test this function
 List<E> filter<E> (List <E> list, bool Function (E) test) {
 	final List<E> result = list.where(test).toList();
-	return result.length >= 1 ? result : list;
+	return result.isEmpty ? list : result;
 }
 
-class MoleculeCount {
-	final Molecule molecule;
-	final int count;
-	const MoleculeCount(this.molecule, this.count);
-}
+void sort<E> (List<E> list, int Function (E) key, {bool reverse = false}) => 
+	list.sort(
+		(E a, E b) {
+			final int result1 = key (a), result2 = key (b);
+			if (reverse) return result2 - result1;
+			else return result1 - result2;
+		}
+	);
 
+int boolToInt(bool value) => value ? 1 : 0;
 
 class Equation {
 	final Side left, right;
@@ -43,82 +48,73 @@ class Equation {
 		) throw "There is an inconsistency in $this";
 	}
 
+	bool avoidRepeat(Element element) => 
+		lastElement == null || element != lastElement;
+
 	bool get balanced => left.elements == right.elements;
 
-	Element getDisplacedElement() {
-		final List<Element> temp = left.elements
-			.where (
-				(CounterEntry<Element> element) => 
-					right.elements [element.value] != element.count)
-			.map ((CounterEntry<Element> element) => element.value)
-			.toList();
-		return filter<Element> (
-			temp, 
-			(Element element) => element != lastElement
-		) [0];
+	Element get element => filter<Element> (
+		left.elements.elements.where(
+			(Element element) => 
+				left.elements [element] != right.elements [element]
+		).toList(),
+		avoidRepeat
+	) [0];
+
+	List<Side> getSides (Element element) {
+		final List<Side> sides = [left, right];
+		sort<Side> (
+			sides,
+			(Side side) => side.elements [element]
+		);
+		return sides;
 	}
 
-	int getStableCount (Molecule molecule, Side otherSide) => 
-		molecule.elementsList.where(
-			(Element element) => (
-				right.elements [element] == left.elements [element] &&
-				!otherSide.molecules.elements.any(
-					(Molecule molecule) => (
-						molecule.elements.length == 1 &&
-						molecule.elements.contains (element)
-					)
+	Molecule getMolecule (List<Side> sides, Element element) {
+		// This function works by compiling a list of candidate molecules.
+		// Then it sorts them by manu different criterium.
+		// This is from least importand to most important
+		// Note: Dart's sort function is not necessarily stable, so...
+		final Side side = sides [0], otherSide = sides [1];
+		final List<Molecule> molecules = side.molecules.elements.where(
+			(Molecule molecule) => molecule.elements.contains (element)
+		);
+		sort<Molecule> (  // Prefer molecules that make other elements even
+			molecules,
+			(Molecule molecule) => molecule.elements.where (
+				(CounterEntry<Element> _element) => 
+					(side.elements [_element.value] + _element.count).isEven
+			).length,
+			reverse: true
+		);
+
+		sort<Molecule> (  // Prefer molecules where element will be even
+			molecules, 
+			(Molecule molecule) => boolToInt (
+				(side.elements [element] + molecule.elements [element]).isEven 
+				== side.elements [element].isEven
+			),
+			reverse: true
+		);
+
+		sort<Molecule> (  // Prefer molecules with the least elements
+			molecules, 
+			(Molecule molecule) => molecule.elements.length - 1
+		);
+
+		sort<Molecule> (  // Prefer molecules with the least stable elements
+			molecules, 
+			(Molecule molecule) => molecule.elements.where (
+				(CounterEntry<Element> _element) => (
+					otherSide.elements [_element.value] == 
+					side.elements [_element.value]
 				)
-			)
-		).length; 
-
-	Molecule getMolecule (Side side, Element element, bool even) {
-		List<Molecule> molecules = side.molecules.elements.where (
-			(Molecule molecule) => molecule.elementsList.contains (element)
-		).toList();
-
-		final Side otherSide = side == right ? left : right;
-		molecules.sort(
-			(Molecule a, Molecule b) =>
-				a.elements [element] - b.elements [element]
+			).length
 		);
 
-		final List<MoleculeCount> moleculeCounts = molecules.map (
-			(Molecule molecule) => MoleculeCount (
-				molecule, getStableCount (molecule, otherSide)
-			)
-		).toList();
-		moleculeCounts.sort (
-			(MoleculeCount a, MoleculeCount b) => 
-				a.count - b.count
-		);
-
-		MoleculeCount preffered = moleculeCounts.firstWhere(
-			(MoleculeCount moleculeCount) => 
-				moleculeCount.count.isEven == even,
-			orElse: () => moleculeCounts [0]
-		);
-		if (
-			preffered == null ||
-			(even && (preffered.count != moleculeCounts [0].count))
-		) preffered = moleculeCounts [0];
-		return preffered.molecule;
+		return molecules [0]; 
 	}
 
-	void balance() {
-		int counter = 0;  // stops infinite loops
-		while (!balanced) {
-			if (counter == 1000) throw "Cannot balance $this";
-			final Element element = getDisplacedElement();
-			lastElement = element;
-			final Side side = left.elements [element] < right.elements [element]
-				? left
-				: right;
-			final bool even = side.elements [element].isEven;
-			final Molecule molecule = getMolecule (side, element, even);
-			side.increase(molecule);
-			counter++;
-		}
-	}
 }
 
 Equation balance (String input) {
