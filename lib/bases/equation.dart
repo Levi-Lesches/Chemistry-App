@@ -32,8 +32,6 @@ class Equation {
 	@override String toString() => "$left --> $right";
 
 	void verify() {
-		print (left.elements);
-		print (right.elements);
 		if (
 			left.elements.any(
 				(CounterEntry<Element> element) => 
@@ -54,7 +52,6 @@ class Equation {
 					right.elements [element.value] != element.count)
 			.map ((CounterEntry<Element> element) => element.value)
 			.toList();
-		print ("$balanced -- ${left.elements}, ${right.elements}");
 		return filter<Element> (
 			temp, 
 			(Element element) => element != lastElement

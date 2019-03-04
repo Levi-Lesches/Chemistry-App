@@ -1,5 +1,10 @@
 import "dart:collection" show IterableMixin;
 
+bool mapEquals (Map a, Map b) {
+  if(a.length != b.length) return false;
+  return a.keys.every((key) => b.containsKey(key) && a[key] == b[key]);
+}
+
 class Counter <T> with IterableMixin <CounterEntry <T>> {
 	List <T> get elements => List.from (counter.keys);
 	final Map <T, int> counter = {};
@@ -44,7 +49,7 @@ class Counter <T> with IterableMixin <CounterEntry <T>> {
 
 	@override operator == (dynamic other) => (
 		other is Counter &&
-		this.counter == other.counter
+		mapEquals (this.counter, other.counter)
 	);
 
 	@override int get hashCode => this.counter.hashCode;
