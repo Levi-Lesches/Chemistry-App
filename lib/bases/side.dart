@@ -45,5 +45,3 @@ class Side {
 			(element.count + elements [element.value]).isEven
 	).length;
 }
-
-testing branches over here
