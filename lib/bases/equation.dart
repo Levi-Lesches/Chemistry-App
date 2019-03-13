@@ -24,8 +24,12 @@ class Equation {
 	final Side left, right;
 	Element lastElement;
 	final String equation;
+	Counter<Element> elements;
 
-	Equation._ (this.left, this.right, this.equation) {verify();}
+	Equation._ (this.left, this.right, this.equation) {
+		verify();
+		this.elements = left.elements;  // just cuz
+	}
 
 	factory Equation (String equation) {
 		final List<String> sides = equation.split(" --> ");
@@ -117,17 +121,34 @@ class Equation {
 	}
 
 	void balance() {
-		int counter = 0;
-		while (!balanced) {
-			if (counter == 100) throw "Cannot balance $equation [$this]";
-			final Element _element = this.element;
-			final List<Side> sides = getSides (_element);
-			final Molecule molecule = getMolecule (sides, _element);
-			sides [0].increase(molecule);
-			lastElement = _element;
-			counter++;
+		final List<List<int>> matrix = [];
+		for (CounterEntry<Element> element in elements) {
+			final List<int> row = [];
+			for (CounterEntry<Molecule> molecule in left.molecules) {
+				if (molecule.value.elements.contains(element.value))
+					row.add (-1 * molecule.value.elements [element.value]);
+				else row.add(0);
+			}
+			for (CounterEntry<Molecule> molecule in right.molecules) { 
+				if (molecule.value.elements.contains(element.value)) 
+					row.add (molecule.value.elements [element.value]);
+				else row.add (0);
+			}
+			matrix.add (row);
 		}
 	}
+
+	// 	int counter = 0;
+	// 	while (!balanced) {
+	// 		if (counter == 100) throw "Cannot balance $equation [$this]";
+	// 		final Element _element = this.element;
+	// 		final List<Side> sides = getSides (_element);
+	// 		final Molecule molecule = getMolecule (sides, _element);
+	// 		sides [0].increase(molecule);
+	// 		lastElement = _element;
+	// 		counter++;
+	// 	}
+	// }
 
 }
 
