@@ -3,14 +3,11 @@ import "element.dart";
 
 import "../helpers/counter.dart";
 
-int temp (Molecule molecule) => molecule.coefficient;
-
 class Side {
-	final String formula;
 	final Counter <Molecule> molecules;
 	Counter <Element> get elements => getElements (molecules);
 
-	Side (this.formula) : molecules = getMolecules (formula);
+	Side (formula) : molecules = getMolecules (formula);
 
 	@override String toString() => molecules.map(
 		(CounterEntry<Molecule> entry) => 
@@ -37,11 +34,4 @@ class Side {
 		}
 		return result;
 	}
-
-	void increase (Molecule molecule) {molecules [molecule] += 1;}
-
-	int getSideParity (Molecule molecule) => molecule.elements.where (
-		(CounterEntry<Element> element) => 
-			(element.count + elements [element.value]).isEven
-	).length;
 }

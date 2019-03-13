@@ -53,72 +53,72 @@ class Equation {
 		) throw "There is an inconsistency in $this";
 	}
 
-	bool avoidRepeat(Element element) => 
-		lastElement == null || element != lastElement;
+	// bool avoidRepeat(Element element) => 
+	// 	lastElement == null || element != lastElement;
 
 	bool get balanced => left.elements == right.elements;
 
-	Element get element => filter<Element> (
-		left.elements.elements.where(
-			(Element element) => 
-				left.elements [element] != right.elements [element]
-		).toList(),
-		avoidRepeat
-	) [0];
+	// Element get element => filter<Element> (
+	// 	left.elements.elements.where(
+	// 		(Element element) => 
+	// 			left.elements [element] != right.elements [element]
+	// 	).toList(),
+	// 	avoidRepeat
+	// ) [0];
 
-	List<Side> getSides (Element element) {
-		final List<Side> sides = [left, right];
-		sort<Side> (
-			sides,
-			(Side side) => side.elements [element]
-		);
-		return sides;
-	}
+	// List<Side> getSides (Element element) {
+	// 	final List<Side> sides = [left, right];
+	// 	sort<Side> (
+	// 		sides,
+	// 		(Side side) => side.elements [element]
+	// 	);
+	// 	return sides;
+	// }
 
-	Molecule getMolecule (List<Side> sides, Element element) {
-		// This function works by compiling a list of candidate molecules.
-		// Then it sorts them by manu different criterium.
-		// This is from least importand to most important
-		// Note: Dart's sort function is not necessarily stable, so...
-		final Side side = sides [0], otherSide = sides [1];
-		final List<Molecule> molecules = side.molecules.elements.where(
-			(Molecule molecule) => molecule.elements.contains (element)
-		).toList();
-		sort<Molecule> (  // Prefer molecules that make other elements even
-			molecules,
-			(Molecule molecule) => molecule.elements.where (
-				(CounterEntry<Element> _element) => 
-					(side.elements [_element.value] + _element.count).isEven
-			).length,
-			reverse: true
-		);
+	// Molecule getMolecule (List<Side> sides, Element element) {
+	// 	// This function works by compiling a list of candidate molecules.
+	// 	// Then it sorts them by manu different criterium.
+	// 	// This is from least importand to most important
+	// 	// Note: Dart's sort function is not necessarily stable, so...
+	// 	final Side side = sides [0], otherSide = sides [1];
+	// 	final List<Molecule> molecules = side.molecules.elements.where(
+	// 		(Molecule molecule) => molecule.elements.contains (element)
+	// 	).toList();
+	// 	sort<Molecule> (  // Prefer molecules that make other elements even
+	// 		molecules,
+	// 		(Molecule molecule) => molecule.elements.where (
+	// 			(CounterEntry<Element> _element) => 
+	// 				(side.elements [_element.value] + _element.count).isEven
+	// 		).length,
+	// 		reverse: true
+	// 	);
 
-		sort<Molecule> (  // Prefer molecules where element will be even
-			molecules, 
-			(Molecule molecule) => boolToInt (
-				(side.elements [element] + molecule.elements [element]).isEven 
-				== side.elements [element].isEven
-			),
-			reverse: true
-		);
+	// 	sort<Molecule> (  // Prefer molecules where element will be even
+	// 		molecules, 
+	// 		(Molecule molecule) => boolToInt (
+	// 			(side.elements [element] + molecule.elements [element]).isEven 
+	// 			== side.elements [element].isEven
+	// 		),
+	// 		reverse: true
+	// 	);
 
-		sort<Molecule> (  // Prefer molecules with the least elements
-			molecules, 
-			(Molecule molecule) => molecule.elements.length - 1
-		);
+	// 	sort<Molecule> (  // Prefer molecules with the least elements
+	// 		molecules, 
+	// 		(Molecule molecule) => molecule.elements.length - 1
+	// 	);
 
-		sort<Molecule> (  // Prefer molecules with the least stable elements
-			molecules, 
-			(Molecule molecule) => molecule.elements.where (
-				(CounterEntry<Element> _element) => (
-					otherSide.elements [_element.value] == 
-					side.elements [_element.value]
-				)
-			).length
-		);
+	// 	sort<Molecule> (  // Prefer molecules with the least stable elements
+	// 		molecules, 
+	// 		(Molecule molecule) => molecule.elements.where (
+	// 			(CounterEntry<Element> _element) => (
+	// 				otherSide.elements [_element.value] == 
+	// 				side.elements [_element.value]
+	// 			)
+	// 		).length
+	// 	);
 
-		return molecules [0]; 
-	}
+	// 	return molecules [0]; 
+	// }
 
 	void balance() {
 		final List<List<int>> matrix = [];
