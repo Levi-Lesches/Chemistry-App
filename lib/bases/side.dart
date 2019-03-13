@@ -34,4 +34,6 @@ class Side {
 		}
 		return result;
 	}
+
+	THIS IS INVALID
 }
