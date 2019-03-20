@@ -1,4 +1,4 @@
-from matrix import rref, get_pivot
+from matrix import Matrix as MyMatrix
 from random import randrange
 from sympy import Matrix
 from itertools import product
@@ -18,8 +18,9 @@ def test(n):
 
 		rows = [row1, row2, row3, row4, row5]
 
-		matrix = Matrix (rows)
-		assert rref (matrix) [0] == matrix.rref() [0], f"{rref (matrix)}\n{matrix.rref()}"
+		matrix = Matrix (rows).rref() [0]
+		matrix2 = MyMatrix (rows).rref()
+		assert list (matrix) == matrix2.flatten(), f"{matrix1}\n{matrix2}"
 
 
 test(1_000)
