@@ -75,3 +75,5 @@ def row_reduce(self) -> ("Matrix", list):
 		pivot_row += 1
 
 	return Matrix._new(self.rows, self.cols, matrix), pivots
+
+# def _eval_rref(self, )
