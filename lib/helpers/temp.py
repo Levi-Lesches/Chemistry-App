@@ -1,6 +1,6 @@
-from matrix import row_reduce, get_pivot
+from matrix import rref, get_pivot
 from random import randrange
-from sympy import Matrix
+from sympy import Matrix, Float, Integer
 from itertools import product
 
 # def rref(self, iszerofunc=_iszero, simplify=False, pivots=True, normalize_last=True):
@@ -57,15 +57,186 @@ from itertools import product
 # 	if pivots: return ret, pivot_cols
 # 	else: return ret
 
-# def _eval_rref(self, iszerofunc, simpfunc, normalize_last=True):
-# 	reduced, pivot_cols, swaps = self._row_reduce(
-# 		iszerofunc, 
-# 		simpfunc,
-# 		normalize_last,
-# 		normalize = True,
-# 		zero_above = True
-# 	)
-# 	return reduced, pivot_cols
+
+def _find_reasonable_pivot_naive(col, iszerofunc=lambda x: x == 0, simpfunc=None):
+    """
+    Helper that computes the pivot value and location from a
+    sequence of contiguous matrix column elements. As a side effect
+    of the pivot search, this function may simplify some of the elements
+    of the input column. A list of these simplified entries and their
+    indices are also returned.
+    This function mimics the behavior of _find_reasonable_pivot(),
+    but does less work trying to determine if an indeterminate candidate
+    pivot simplifies to zero. This more naive approach can be much faster,
+    with the trade-off that it may erroneously return a pivot that is zero.
+    ``col`` is a sequence of contiguous column entries to be searched for
+    a suitable pivot.
+    ``iszerofunc`` is a callable that returns a Boolean that indicates
+    if its input is zero, or None if no such determination can be made.
+    ``simpfunc`` is a callable that simplifies its input. It must return
+    its input if it does not simplify its input. Passing in
+    ``simpfunc=None`` indicates that the pivot search should not attempt
+    to simplify any candidate pivots.
+    Returns a 4-tuple:
+    (pivot_offset, pivot_val, assumed_nonzero, newly_determined)
+    ``pivot_offset`` is the sequence index of the pivot.
+    ``pivot_val`` is the value of the pivot.
+    pivot_val and col[pivot_index] are equivalent, but will be different
+    when col[pivot_index] was simplified during the pivot search.
+    ``assumed_nonzero`` is a boolean indicating if the pivot cannot be
+    guaranteed to be zero. If assumed_nonzero is true, then the pivot
+    may or may not be non-zero. If assumed_nonzero is false, then
+    the pivot is non-zero.
+    ``newly_determined`` is a list of index-value pairs of pivot candidates
+    that were simplified during the pivot search.
+    """
+
+    # indeterminates holds the index-value pairs of each pivot candidate
+    # that is neither zero or non-zero, as determined by iszerofunc().
+    # If iszerofunc() indicates that a candidate pivot is guaranteed
+    # non-zero, or that every candidate pivot is zero then the contents
+    # of indeterminates are unused.
+    # Otherwise, the only viable candidate pivots are symbolic.
+    # In this case, indeterminates will have at least one entry,
+    # and all but the first entry are ignored when simpfunc is None.
+    indeterminates = []
+    for i, col_val in enumerate(col):
+        col_val_is_zero = iszerofunc(col_val)
+        if col_val_is_zero == False:
+            # This pivot candidate is non-zero.
+            return i, col_val, False, []
+        elif col_val_is_zero is None:
+            # The candidate pivot's comparison with zero
+            # is indeterminate.
+            indeterminates.append((i, col_val))
+
+    if len(indeterminates) == 0:
+        # All candidate pivots are guaranteed to be zero, i.e. there is
+        # no pivot.
+        return None, None, False, []
+
+    if simpfunc is None:
+        # Caller did not pass in a simplification function that might
+        # determine if an indeterminate pivot candidate is guaranteed
+        # to be nonzero, so assume the first indeterminate candidate
+        # is non-zero.
+        return indeterminates[0][0], indeterminates[0][1], True, []
+
+    # newly_determined holds index-value pairs of candidate pivots
+    # that were simplified during the search for a non-zero pivot.
+    newly_determined = []
+    for i, col_val in indeterminates:
+        tmp_col_val = simpfunc(col_val)
+        if id(col_val) != id(tmp_col_val):
+            # simpfunc() simplified this candidate pivot.
+            newly_determined.append((i, tmp_col_val))
+            if iszerofunc(tmp_col_val) == False:
+                # Candidate pivot simplified to a guaranteed non-zero value.
+                return i, tmp_col_val, False, newly_determined
+
+    return indeterminates[0][0], indeterminates[0][1], True, newly_determined
+
+def _find_reasonable_pivot(col, iszerofunc=lambda x: x == 0, simpfunc=lambda x: x):
+    """ Find the lowest index of an item in ``col`` that is
+    suitable for a pivot.  If ``col`` consists only of
+    Floats, the pivot with the largest norm is returned.
+    Otherwise, the first element where ``iszerofunc`` returns
+    False is used.  If ``iszerofunc`` doesn't return false,
+    items are simplified and retested until a suitable
+    pivot is found.
+    Returns a 4-tuple
+        (pivot_offset, pivot_val, assumed_nonzero, newly_determined)
+    where pivot_offset is the index of the pivot, pivot_val is
+    the (possibly simplified) value of the pivot, assumed_nonzero
+    is True if an assumption that the pivot was non-zero
+    was made without being proved, and newly_determined are
+    elements that were simplified during the process of pivot
+    finding."""
+
+    newly_determined = []
+    col = list(col)
+    # a column that contains a mix of floats and integers
+    # but at least one float is considered a numerical
+    # column, and so we do partial pivoting
+    if all(isinstance(x, (Float, Integer)) for x in col) and any(
+            isinstance(x.p, Float) for x in col):
+        col_abs = [abs(x) for x in col]
+        max_value = max(col_abs)
+        if iszerofunc(max_value):
+            # just because iszerofunc returned True, doesn't
+            # mean the value is numerically zero.  Make sure
+            # to replace all entries with numerical zeros
+            if max_value != 0:
+                newly_determined = [(i, 0) for i, x in enumerate(col) if x != 0]
+            return (None, None, False, newly_determined)
+        index = col_abs.index(max_value)
+        return (index, col[index], False, newly_determined)
+
+    # PASS 1 (iszerofunc directly)
+    possible_zeros = []
+    for i, x in enumerate(col):
+        is_zero = iszerofunc(x)
+        # is someone wrote a custom iszerofunc, it may return
+        # BooleanFalse or BooleanTrue instead of True or False,
+        # so use == for comparison instead of `is`
+        if is_zero == False:
+            # we found something that is definitely not zero
+            return (i, x, False, newly_determined)
+        possible_zeros.append(is_zero)
+
+    # by this point, we've found no certain non-zeros
+    if all(possible_zeros):
+        # if everything is definitely zero, we have
+        # no pivot
+        return (None, None, False, newly_determined)
+
+    # PASS 2 (iszerofunc after simplify)
+    # we haven't found any for-sure non-zeros, so
+    # go through the elements iszerofunc couldn't
+    # make a determination about and opportunistically
+    # simplify to see if we find something
+    for i, x in enumerate(col):
+        if possible_zeros[i] is not None:
+            continue
+        simped = simpfunc(x)
+        is_zero = iszerofunc(simped)
+        if is_zero == True or is_zero == False:
+            newly_determined.append((i, simped))
+        if is_zero == False:
+            return (i, simped, False, newly_determined)
+        possible_zeros[i] = is_zero
+
+    # after simplifying, some things that were recognized
+    # as zeros might be zeros
+    if all(possible_zeros):
+        # if everything is definitely zero, we have
+        # no pivot
+        return (None, None, False, newly_determined)
+
+    # PASS 3 (.equals(0))
+    # some expressions fail to simplify to zero, but
+    # ``.equals(0)`` evaluates to True.  As a last-ditch
+    # attempt, apply ``.equals`` to these expressions
+    for i, x in enumerate(col):
+        if possible_zeros[i] is not None:
+            continue
+        if x.equals(S.Zero):
+            # ``.iszero`` may return False with
+            # an implicit assumption (e.g., ``x.equals(0)``
+            # when ``x`` is a symbol), so only treat it
+            # as proved when ``.equals(0)`` returns True
+            possible_zeros[i] = True
+            newly_determined.append((i, S.Zero))
+
+    if all(possible_zeros):
+        return (None, None, False, newly_determined)
+
+    # at this point there is nothing that could definitely
+    # be a pivot.  To maintain compatibility with existing
+    # behavior, we'll assume that an illdetermined thing is
+    # non-zero.  We should probably raise a warning in this case
+    i = possible_zeros.index(None)
+    return (i, col[i], True, newly_determined)
 
 def _row_reduce(self, iszerofunc, simpfunc, normalize_last=True, normalize=True, zero_above=True):
 	"""Row reduce ``self`` and return a tuple (rref_matrix,
@@ -111,13 +282,13 @@ def _row_reduce(self, iszerofunc, simpfunc, normalize_last=True, normalize=True,
 	swaps = []
 	# use a fraction free method to zero above and below each pivot
 	while piv_col < cols and piv_row < rows:
-		# pivot_offset, pivot_val, \
-		# assumed_nonzero, newly_determined = _find_reasonable_pivot(
-		# 	get_col(piv_col)[piv_row:], iszerofunc, simpfunc)
+		pivot_offset, pivot_val, \
+		assumed_nonzero, newly_determined = _find_reasonable_pivot_naive(
+			get_col(piv_col)[piv_row:], iszerofunc, simpfunc)
 
-		pivot_offset, pivot_val = get_pivot(get_col (piv_col) [piv_row:])
-		assumed_nonzero = None
-		newly_determined = []
+		# pivot_offset, pivot_val = get_pivot(get_col (piv_col) [piv_row:])
+		# assumed_nonzero = False
+		# newly_determined = []
 
 		# _find_reasonable_pivot may have simplified some things
 		# in the process.  Let's not let them go to waste
@@ -175,29 +346,41 @@ length = len (combos)
 random = lambda: randrange (length)
 get_combo = lambda: combos [random()]
 
-for _ in range (1_000): 
-	row1 = get_combo()
-	row2 = get_combo()
-	row3 = get_combo()
-	row4 = get_combo()
-	row5 = get_combo()
-	matrix = Matrix ([
-		row1, 
-		row2, 
-		row3,
-		row4, 
-		row5
-	])
-	result1 = _row_reduce (
-		matrix, 
-		iszerofunc = lambda x: x == 0,
-		simpfunc = None,
-		normalize_last = False,
-		normalize = True,
-		zero_above = True
-	) [:-1] 
-	result2 = row_reduce (matrix)
+def test(n):
+	for _ in range (n): 
+		row1 = get_combo()
+		row2 = get_combo()
+		row3 = get_combo()
+		row4 = get_combo()
+		row5 = get_combo()
 
-	result2 = result2 [0], tuple (result2 [1])
+		rows = [row1, row2, row3, row4, row5]
 
-	assert result1 == result2, f"{result1}\n{result2}"
+		for row in rows: 
+
+			index1, val1, assumed1, determined1 = _find_reasonable_pivot_naive (row)
+			index2, val2 = get_pivot (row)
+			index3, val3, assumed2, determined2 = _find_reasonable_pivot (row)
+
+			assert (index1 == index2 == index3) and (val1 == val2 == val3)
+			assert (assumed1 == assumed2) and assumed2 is False
+			assert (determined1 == determined2) and determined2 == []
+
+
+		matrix = Matrix (rows)
+		result1, _, __ = _row_reduce (
+			matrix, 
+			iszerofunc = lambda x: x == 0,
+			simpfunc = lambda x: x,
+			normalize_last = True,
+			normalize = True,
+			zero_above = True
+		)
+
+		result3, pivots = rref (matrix)
+		assert result1 == result3, f"{result1}\n{result3}"
+
+		assert rref (matrix) [0] == matrix.rref() [0], f"{rref (matrix)}\n{matrix.rref()}"
+
+
+test(1_000)

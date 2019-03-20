@@ -1,5 +1,6 @@
 from sympy import Matrix
 
+
 def get_pivot (col: list) -> (int, int): 
 	result_index = None
 	result = None
@@ -9,11 +10,13 @@ def get_pivot (col: list) -> (int, int):
 			result_index = index
 			result = value
 
-	else: return result_index, result
+	else:
+		if all (num == 0 for num in col): return None, None
+		else: return result_index, result
 
-def row_reduce(self) -> ("Matrix", list):
+def rref(self) -> Matrix:
 	"""
-		- normalize_last = False
+		- normalize_last = True
 		- isZeroFunc = lambda x: x == 0
 		- zero_above = True
 		- normalize = True
@@ -43,27 +46,24 @@ def row_reduce(self) -> ("Matrix", list):
 	pivot_row = 0
 	pivot_col = 0
 	pivots = []
-
 	while pivot_col < cols and pivot_row < self.rows:
 		offset, value = get_pivot (get_col (pivot_col) [pivot_row:])
-		offset = int (offset)
-		value = int (value)
 
 		if offset is None: 
-			raise TypeError ("matrix.row_reduce: found a None value")
+			pivot_col += 1
+			continue
 
 		pivots.append (pivot_col)
-
 		if offset != 0: swap_rows (pivot_row, offset + pivot_row)
 
-		# normalize
-		matrix [pivot_row * cols + pivot_col] = 1
-		for index in range (
-			pivot_row * cols + pivot_col + 1,
-			(pivot_row + 1) * cols
-		): matrix [index] = matrix [index] / value
+	# normalize:
+		# matrix [pivot_row * cols + pivot_col] = 1
+		# for index in range (
+		# 	pivot_row * cols + pivot_col + 1,
+		# 	(pivot_row + 1) * cols
+		# ): matrix [index] = matrix [index] / value
+		# value = 1
 
-		value = 1
 
 		for row in range (self.rows): 
 			if row == pivot_row: continue
@@ -74,6 +74,11 @@ def row_reduce(self) -> ("Matrix", list):
 
 		pivot_row += 1
 
-	return Matrix._new(self.rows, self.cols, matrix), pivots
+	for index, col in enumerate (pivots):
+		temp = index * cols + col
+		value = matrix [temp]
+		matrix [temp] = 1
+		for index2 in range (temp + 1, (index + 1) * cols): 
+			matrix [index2] = matrix [index2] / value
 
-# def _eval_rref(self, )
+	return Matrix._new(self.rows, self.cols, matrix), pivots
