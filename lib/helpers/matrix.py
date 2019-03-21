@@ -13,7 +13,7 @@ def lcm (nums) -> int:
 
     return result
 
-def expand_fractions(nullspace: [Fraction]): 
+def expand_fractions(nullspace: [Fraction]) -> [int]: 
     lcd = lcm (nullspace)
     return [
         abs (val.num * (lcd // val.denom))

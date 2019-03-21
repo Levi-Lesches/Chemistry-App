@@ -39,3 +39,11 @@ int lcm (List<Fraction> fractions) {
 	}
 	return result;
 }
+
+List<int> expandFractions (List<Fraction> nullspace) {
+	int lcd = lcm (nullspace);  // technically, LCD is not right, but idc
+	return nullspace.map(
+		(Fraction fraction) => 
+			(fraction.num * (lcd ~/ fraction.denom)).abs()
+	).toList();
+}
