@@ -72,6 +72,30 @@ class Matrix with IterableMixin <List<double>>{
 		return Matrix._ (rows, cols, matrix);
 	}
 
+	factory Matrix.fromDimensions (rows, cols, List<double> list) {
+		final List <List<double>> matrix = [];
+		int index = 0;
+
+		for (final int row in range (rows)) {
+			final List<double> nums = [];
+			for (final int col in range (cols))
+				nums.add (list [index++]);
+
+			matrix.add(nums);
+		}
+
+		if (index != list.length) throw IndexError(
+			rows * cols,  // what was invalid
+			matrix,  // what is being indexed
+			"rows, cols",  // the invalid arguments
+			"Invalid dimensions for matrix",  // Error message
+			index  // current index
+		);
+
+		return Matrix._ (rows, cols, matrix);
+	}
+
+
 	operator [] (Slice slice) => matrix [slice.start] [slice.end];
 	operator == (dynamic other) => other is Matrix && other.matrix == matrix;
 	int get hashCode => matrix.hashCode;
@@ -84,5 +108,15 @@ class Matrix with IterableMixin <List<double>>{
 				"\n\t" + row.map ((double num) => num.toString()).join(", ")
 		).join ("") + 
 		"\n)";
+
+	List<double> get flatten {
+		final List<double> result = [];
+		for (List<double> row in this) {
+			for (double num in row) result.add (num);
+		}
+		return result;
+	}
+
+
 
 }
