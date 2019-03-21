@@ -1,47 +1,43 @@
 from my_stuff.misc import init
 
-class Fraction: 
-    @init
-    def init (self, num, denom, negative): pass
-    def __repr__(self): return f"{'-' if self.negative else ''}({self.num}/{self.denom})"
-    def __new__(cls, num, denom): 
-        if denom == 0: raise ZeroDivisionError()
-        elif num == denom: return 1 if -1 else num
-        elif not num % denom: return num // denom
-        else: 
-            negative = (num >= 0) != (denom >= 0)
-            num = abs (num)
-            denom = abs (denom)
-            for n in range (num, 1, -1): 
-                if not num % n and not denom % n:
-                    num //= n
-                    denom //= n
-            fraction = object.__new__(cls)
-            fraction.init(num, denom, negative)
-            return fraction
-
 def lcm (nums) -> int: 
     max_denom = float("-inf")
     denoms = set()
     for fraction in nums: 
-        if type (fraction) is not Fraction: continue
-        elif fraction.denom > max_denom: max_denom = fraction.denom
         denoms.add(fraction.denom)
+        if fraction.denom > max_denom: max_denom = fraction.denom
 
-    if len (denoms) == 0 or 0 in denoms: return 1
     result = max_denom
     while any (result % denom for denom in denoms): 
         result += max_denom
 
     return result
 
-def expand_fractions(nullspace: list): 
+def expand_fractions(nullspace: [Fraction]): 
     lcd = lcm (nullspace)
     return [
-        abs (
-            int (val * lcd) if type (val) is int else int (val.num * (lcd / val.denom)))
+        abs (val.num * (lcd // val.denom))
         for val in nullspace
     ]
+
+
+class Fraction: 
+    @init
+    def init (self, num, denom, negative): pass
+    def __repr__(self): return f"{'-' if self.negative else ''}({self.num}/{self.denom})"
+    def __new__(cls, num, denom): 
+        if denom == 0: raise ZeroDivisionError()
+        negative: bool = num >= 0 != denom >= 0
+        num = abs (num)
+        denom = abs (denom)
+        for n in range (num, 1, -1):  # simplify
+            if not num % n and not denom % n: 
+                num //= n
+                denom //= n
+
+        fraction: Fraction = object.__new__(cls)
+        fraction.init(num, denom, negative)
+        return fraction
 
 
 class Matrix: 
