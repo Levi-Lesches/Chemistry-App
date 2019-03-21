@@ -5,7 +5,7 @@ class Fraction:
     @init
     def __init__ (self, num, denom): pass
 
-def lcm (*nums) -> int: 
+def lcm (nums) -> int: 
     max_denom = float("-inf")
     denoms = set()
     for fraction in nums: 
@@ -20,7 +20,13 @@ def lcm (*nums) -> int:
 
     return result
 
-# def expand_fractions(nullspace: list)
+def expand_fractions(nullspace: list): 
+    lcd = lcm (nullspace)
+    return [
+        abs (
+            int (val * lcd) if type (val) is int else int (val.num * (lcd / val.denom)))
+        for val in nullspace
+    ]
 
 
 class Matrix: 
