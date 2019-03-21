@@ -23,6 +23,11 @@ class Fraction {
 	}
 }
 
+class Slice {
+	final int start, end;
+	const Slice (this.start, this.end);
+}
+
 int lcm (List<Fraction> fractions) {
 	int maxDenom;
 	Set<int> denoms = Set<int>();
@@ -66,4 +71,6 @@ class Matrix with IterableMixin <List<double>>{
 		} 
 		return Matrix._ (rows, cols, matrix);
 	}
+
+	operator [] (Slice slice) => matrix [slice.start] [slice.end];
 }
