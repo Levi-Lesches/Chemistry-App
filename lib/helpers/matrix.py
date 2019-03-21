@@ -4,7 +4,7 @@ class Matrix:
 
     @init
     def __init__(self, matrix): self.rows, self.cols = self.set_shape()
-    def __getitem__(self, row, col): return self.matrix [row] [col]
+    def __getitem__(self, p): return self.matrix [p[0]] [p[1]]
     def __eq__(self, other): return self.matrix == other.matrix
     def __len__(self): return self.rows * self.cols
     def __iter__(self): return iter (self.matrix)
@@ -28,7 +28,7 @@ class Matrix:
         for row in self.matrix:
             if cols is None: cols = len (row)
             elif len (row) != cols: raise SyntaxError("Inconsistent dimensions")
-            else: rows += 1
+            rows += 1
         return rows, cols
 
     def fromDimensions(rows, cols, List):
@@ -40,6 +40,7 @@ class Matrix:
                 values.append (List [index])
                 index += 1
             result.append (values)
+        if index != len (List): raise SyntaxError("fromDimensions failed")
         return Matrix (result)
 
     def get_pivot (self, col: list) -> (int, int): 

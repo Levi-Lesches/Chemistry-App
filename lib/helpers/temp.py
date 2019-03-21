@@ -22,5 +22,4 @@ def test(n):
 		matrix2 = MyMatrix (rows).rref()
 		assert list (matrix) == matrix2.flatten(), f"{matrix1}\n{matrix2}"
 
-
-test(1_000)
+test(1)
