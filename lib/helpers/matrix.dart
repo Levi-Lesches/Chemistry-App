@@ -1,3 +1,5 @@
+import "dart:collection" show IterableMixin;
+
 import "range.dart";
 
 class Fraction {
@@ -46,4 +48,22 @@ List<int> expandFractions (List<Fraction> nullspace) {
 		(Fraction fraction) => 
 			(fraction.num * (lcd ~/ fraction.denom)).abs()
 	).toList();
+}
+
+class Matrix with IterableMixin <List<double>>{
+	final int rows, cols;
+	final List <List<double>> matrix;
+	Matrix._ (this.rows, this.cols, this.matrix);
+
+	Iterator <List<double>> get iterator => matrix.iterator;
+
+	factory Matrix (List <List<double>> matrix) {
+		int cols, rows = 0;
+		for (final List<double> row in matrix) {
+			if (cols == null) cols = row.length;
+			else if (row.length != cols) throw "Inconsistent Dimensions";
+			rows++;
+		} 
+		return Matrix._ (rows, cols, matrix);
+	}
 }
