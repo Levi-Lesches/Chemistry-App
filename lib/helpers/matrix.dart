@@ -28,6 +28,12 @@ class Slice {
 	const Slice (this.start, this.end);
 }
 
+class Pivot {
+	final int index, value;
+	Pivot (Pair pair) : index = pair.index, value = pair.value;
+	Pivot.empty() : index = null, value = null;
+}
+
 int lcm (List<Fraction> fractions) {
 	int maxDenom;
 	Set<int> denoms = Set<int>();
@@ -117,6 +123,18 @@ class Matrix with IterableMixin <List<double>>{
 		return result;
 	}
 
+	static Pivot getPivot(List<double> col) {
+		Pair result;
 
+		for (final Pair<double> pair in enumerate<double> (col)) {
+			if (pair.value != 0) return Pivot (pair);
+			else result = pair;
+		}
+
+		if (col.every ((double num) => num == 0)) return Pivot.empty();
+		else return Pivot (result);
+	}
+
+	
 
 }
