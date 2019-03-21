@@ -20,3 +20,22 @@ class Fraction {
 		return Fraction._ (num, denom, negative);
 	}
 }
+
+int lcm (List<Fraction> fractions) {
+	int maxDenom;
+	Set<int> denoms = Set<int>();
+
+	// find the largest denominator
+	for (final Fraction fraction in fractions) {
+		denoms.add (fraction.denom);
+		if (maxDenom == null || fraction.denom > maxDenom) 
+			maxDenom = fraction.denom;
+	}
+
+	// keep adding the denominator until all values are integers
+	int result = maxDenom;
+	while (denoms.any((int denom) => result % denom != 0)) {
+		result += maxDenom;
+	}
+	return result;
+}
