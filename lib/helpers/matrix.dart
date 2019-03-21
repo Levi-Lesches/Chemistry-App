@@ -73,4 +73,16 @@ class Matrix with IterableMixin <List<double>>{
 	}
 
 	operator [] (Slice slice) => matrix [slice.start] [slice.end];
+	operator == (dynamic other) => other is Matrix && other.matrix == matrix;
+	int get hashCode => matrix.hashCode;
+	int get length => rows * cols;
+
+	String toString() => 
+		"Matrix(" + 
+		this.map (
+			(List<double> row) => 
+				"\n\t" + row.map ((double num) => num.toString()).join(", ")
+		).join ("") + 
+		"\n)";
+
 }
