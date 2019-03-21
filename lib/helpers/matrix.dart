@@ -16,6 +16,8 @@ Iterable<int> range(end, {start = -1}) sync* {
 	while (start < end) yield start++;
 }
 
+// int lcm (List<double> )
+
 class Matrix with IterableMixin<List<double>> {
 	final List<List<double>> matrix;
 	final int cols, rows;

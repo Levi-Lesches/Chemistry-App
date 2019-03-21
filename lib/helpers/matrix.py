@@ -1,7 +1,29 @@
 from my_stuff.misc import init
+from birdseye import eye
+
+class Fraction: 
+    @init
+    def __init__ (self, num, denom): pass
+
+def lcm (*nums) -> int: 
+    max_denom = float("-inf")
+    denoms = set()
+    for fraction in nums: 
+        if type (fraction) is not Fraction: continue
+        elif fraction.denom > max_denom: max_denom = fraction.denom
+        denoms.add(fraction.denom)
+
+    if len (denoms) == 0 or 0 in denoms: return None
+    result = max_denom
+    while any (result % denom for denom in denoms): 
+        result += max_denom
+
+    return result
+
+# def expand_fractions(nullspace: list)
+
 
 class Matrix: 
-
     @init
     def __init__(self, matrix): self.rows, self.cols = self.set_shape()
     def __getitem__(self, p): return self.matrix [p[0]] [p[1]]
@@ -106,3 +128,12 @@ class Matrix:
                 matrix [index2] = matrix [index2] / value
 
         return Matrix.fromDimensions(self.rows, self.cols, matrix)
+
+    def nullspace(self): 
+        rref = self.rref()
+        nullspace = [rref [n, -1] for n in range (rref.rows)]
+        nullspace.extend ([1 for _ in range (rred.cols - len (nullspace))])
+
+        for index, value in enumerate (nullspace): 
+            if value == 0: nullspace [index] = 1
+        return expand_fractions(nullspace)
