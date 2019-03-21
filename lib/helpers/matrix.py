@@ -1,9 +1,24 @@
 from my_stuff.misc import init
-from birdseye import eye
 
 class Fraction: 
     @init
-    def __init__ (self, num, denom): pass
+    def init (self, num, denom, negative): pass
+    def __repr__(self): return f"{'-' if self.negative else ''}({self.num}/{self.denom})"
+    def __new__(cls, num, denom): 
+        if denom == 0: raise ZeroDivisionError()
+        elif num == denom: return 1 if -1 else num
+        elif not num % denom: return num // denom
+        else: 
+            negative = (num >= 0) != (denom >= 0)
+            num = abs (num)
+            denom = abs (denom)
+            for n in range (num, 1, -1): 
+                if not num % n and not denom % n:
+                    num //= n
+                    denom //= n
+            fraction = object.__new__(cls)
+            fraction.init(num, denom, negative)
+            return fraction
 
 def lcm (nums) -> int: 
     max_denom = float("-inf")
@@ -13,7 +28,7 @@ def lcm (nums) -> int:
         elif fraction.denom > max_denom: max_denom = fraction.denom
         denoms.add(fraction.denom)
 
-    if len (denoms) == 0 or 0 in denoms: return None
+    if len (denoms) == 0 or 0 in denoms: return 1
     result = max_denom
     while any (result % denom for denom in denoms): 
         result += max_denom
@@ -131,15 +146,16 @@ class Matrix:
             value = matrix [temp]
             matrix [temp] = 1
             for index2 in range (temp + 1, (index + 1) * cols): 
-                matrix [index2] = matrix [index2] / value
+                matrix [index2] = Fraction (matrix [index2], value)
 
         return Matrix.fromDimensions(self.rows, self.cols, matrix)
 
     def nullspace(self): 
         rref = self.rref()
         nullspace = [rref [n, -1] for n in range (rref.rows)]
-        nullspace.extend ([1 for _ in range (rred.cols - len (nullspace))])
+        nullspace.extend ([1 for _ in range (rref.cols - len (nullspace))])
 
         for index, value in enumerate (nullspace): 
             if value == 0: nullspace [index] = 1
+
         return expand_fractions(nullspace)
