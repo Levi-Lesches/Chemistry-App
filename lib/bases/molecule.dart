@@ -60,7 +60,7 @@ class Molecule {
 
 			Counter <Element> sub = getElements (match);
 			sub *= coefficient;
-			List <int> indices = range (
+			Iterable <int> indices = range (
 				nestedFormula.end - 2,
 				start: nestedFormula.start 
 			);

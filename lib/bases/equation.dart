@@ -8,9 +8,8 @@ import "../helpers/range.dart";
 class Equation {
 	final Side left, right;
 	Counter<Element> elements;
-	final Matrix matrix;
 
-	Equation._ (this.left, this.right, this.matrix) {
+	Equation._ (this.left, this.right) {
 		verify();
 		this.elements = left.elements;  // just cuz
 	}
@@ -20,7 +19,7 @@ class Equation {
 		assert (sides.length == 2, "Equation recieved too many parts: $equation");
 		final Side left = Side (sides [0]);
 		final Side right = Side (sides [1]); 
-		return Equation._(left, right, getMatrix(left, right));
+		return Equation._(left, right);
 	}
 
 	@override String toString() => "$left --> $right";
@@ -37,7 +36,7 @@ class Equation {
 		) throw "There is an inconsistency in $this";
 	}
 
-	static Matrix getMatrix(Side left, Side right) {
+	Matrix get matrix {
 		final List<List<int>> matrix = [];
 		for (final CounterEntry<Element> element in left.elements) {
 			final List<int> row = [];
