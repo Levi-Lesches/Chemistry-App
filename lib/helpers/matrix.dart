@@ -23,7 +23,7 @@ class Fraction {
 		return Fraction._ (nom, denom, negative);
 	}
 
-	double get toNum => nom / denom;
+	num get toNum => nom / denom;
 }
 
 class Slice {
@@ -65,12 +65,12 @@ List<int> expandFractions (List<Fraction> nullspace) {
 	).toList();
 }
 
-class Matrix with IterableMixin <List<double>>{
+class Matrix with IterableMixin <List<num>>{
 	final int rows, cols;
 	final List <List<Fraction>> matrix;
 	Matrix._ (this.rows, this.cols, this.matrix);
 
-	Iterator <List<double>> get iterator => matrix.map(
+	Iterator <List<num>> get iterator => matrix.map(
 		(List<Fraction> row) => row.map (
 			(Fraction fraction) => fraction.toNum
 		)
@@ -226,12 +226,23 @@ class Matrix with IterableMixin <List<double>>{
 		return Matrix.fromDimensions(rows, cols, result);
 	}
 
-	// List<int> get nullspace {
-	// 	Matrix rref = this.rref;
-	// 	List<Fraction> result = [];
-	// 	for (Pair<Fraction> pair in enumerate (this)) {
+	List<int> get nullspace {
+		Matrix rref = this.rref;
+		List<Fraction> result = [];
+		for (final Pair<List<Fraction>> pair in enumerate (rref.matrix))
+			result.add (rref [Slice (pair.index, pair.value.length - 1)]);
+		result.addAll(
+			List.filled (
+				rref.cols - result.length,
+				Fraction (1, 1)
+			)
+		);
 
-	// 	}
-	// }
+		for (final Pair<Fraction> pair in enumerate (result)) {
+			if (pair.value.nom == 0) result [pair.index] = Fraction (1, 1);
+		}
+
+		return expandFractions (result);
+	}
 
 }
