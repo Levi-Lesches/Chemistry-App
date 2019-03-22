@@ -3,24 +3,27 @@ import "dart:collection" show IterableMixin;
 import "range.dart";
 
 class Fraction {
-	final int num, denom;
+	final int nom, denom;
 	final bool negative;
-	const Fraction._ (this.num, this.denom, this.negative);
+	const Fraction._ (this.nom, this.denom, this.negative);
 
-	factory Fraction (int num int denom) {
+	factory Fraction (num nom, num denom) {
+		assert (nom is int && denom is int, "Fraction received double");
 		if (denom == 0) throw IntegerDivisionByZeroException();
-		final bool negative = num >= 0 != denom >= 0;
-		num = num.abs();
+		final bool negative = nom >= 0 != denom >= 0;
+		nom = nom.abs();
 		denom = denom.abs();
-		for (final int n in range (1, start: num, step: -1)) {
-			if (num % n == 0 && denom % n == 0) {
-				num ~/= n;  // integer division
+		for (final int n in range (1, start: nom, step: -1)) {
+			if (nom % n == 0 && denom % n == 0) {
+				nom ~/= n;  // integer division
 				denom ~/= n;
 			}
 		}
 
-		return Fraction._ (num, denom, negative);
+		return Fraction._ (nom, denom, negative);
 	}
+
+	double get toNum => nom / denom;
 }
 
 class Slice {
@@ -29,8 +32,9 @@ class Slice {
 }
 
 class Pivot {
-	final int index, value;
-	Pivot (Pair<int> pair) : index = pair.index, value = pair.value;
+	final int index;
+	final double value;
+	Pivot (Pair<double> pair) : index = pair.index, value = pair.value;
 	Pivot.empty() : index = null, value = null;
 }
 
@@ -57,33 +61,47 @@ List<int> expandFractions (List<Fraction> nullspace) {
 	int lcd = lcm (nullspace);  // technically, LCD is not right, but idc
 	return nullspace.map(
 		(Fraction fraction) => 
-			(fraction.num * (lcd ~/ fraction.denom)).abs()
+			(fraction.nom * (lcd ~/ fraction.denom)).abs()
 	).toList();
 }
 
-class Matrix with IterableMixin <List<int>>{
+class Matrix with IterableMixin <List<double>>{
 	final int rows, cols;
-	final List <List<int>> matrix;
+	final List <List<Fraction>> matrix;
 	Matrix._ (this.rows, this.cols, this.matrix);
 
-	Iterator <List<int>> get iterator => matrix.iterator;
+	Iterator <List<double>> get iterator => matrix.map(
+		(List<Fraction> row) => row.map (
+			(Fraction fraction) => fraction.toNum
+		)
+	).iterator;
 
 	factory Matrix (List <List<int>> matrix) {
+		final List<List<Fraction>> result = [];
 		int cols, rows = 0;
 		for (final List<int> row in matrix) {
+			final List<Fraction> rowResult = [];
 			if (cols == null) cols = row.length;
 			else if (row.length != cols) throw "Inconsistent Dimensions";
+			for (final int index in range (row.length))
+				rowResult.add (Fraction (row [index], 1));
+			
 			rows++;
+			result.add(rowResult);
 		} 
-		return Matrix._ (rows, cols, matrix);
+		return Matrix._ (rows, cols, result);
 	}
 
-	factory Matrix.fromDimensions (rows, cols, List<int> list) {
-		final List <List<int>> matrix = [];
+	factory Matrix.fromDimensions(
+		rows, 
+		cols, 
+		List<Fraction> list
+	) {
+		final List <List<Fraction>> matrix = [];
 		int index = 0;
 
 		for (final int _ in range (rows)) {
-			final List<int> row = [];
+			final List<Fraction> row = [];
 			for (final int __ in range (cols))
 				row.add (list [index++]);
 
@@ -102,43 +120,43 @@ class Matrix with IterableMixin <List<int>>{
 	}
 
 
-	operator [] (Slice slice) => matrix [slice.start] [slice.end];
+	Fraction operator [] (Slice slice) => matrix [slice.start] [slice.end];
 	operator == (dynamic other) => other is Matrix && other.matrix == matrix;
 	int get hashCode => matrix.hashCode;
 	int get length => rows * cols;
 
 	String toString() => 
 		"Matrix(" + 
-		this.map (
-			(List<int> row) => 
-				"\n\t" + row.map ((int num) => num.toString()).join(", ")
+		matrix.map (
+			(List<Fraction> row) => 
+				"\n\t" + row.map ((Fraction num) => num.toString()).join(", ")
 		).join ("") + 
 		"\n)";
 
-	List<int> get flatten {
-		final List<int> result = [];
-		for (List<int> row in this) {
-			for (int num in row) result.add (num);
+	List<double> get flatten {
+		final List<double> result = [];
+		for (List<double> row in this) {
+			for (double num in row) result.add (num);
 		}
 		return result;
 	}
 
-	static Pivot getPivot(List<int> col) {
+	static Pivot getPivot(List<double> col) {
 		Pair result;
 
-		for (final Pair<int> pair in enumerate<int> (col)) {
+		for (final Pair<double> pair in enumerate<double> (col)) {
 			if (pair.value != 0) return Pivot (pair);
 			else result = pair;
 		}
 
-		if (col.every ((int num) => num == 0)) return Pivot.empty();
+		if (col.every ((double num) => num == 0)) return Pivot.empty();
 		else return Pivot (result);
 	}
 
 	Matrix get rref {
-		final List<int> matrix = this.flatten;
+		final List<double> matrix = this.flatten;
 
-		List<int> getCol (int index) => matrix.getRange (index, cols);
+		List<double> getCol (int index) => matrix.getRange (index, cols);
 
 		void swapRows (int a, int b) {
 			final int start1 = a * cols;
@@ -146,16 +164,16 @@ class Matrix with IterableMixin <List<int>>{
 			final int start2 = b * cols;
 			final int end2 = (b + 1) * cols;
 
-			final List<int> temp = matrix.getRange(start1, end1);
+			final List<double> temp = matrix.getRange(start1, end1);
 			matrix.replaceRange(start1, end1, matrix.getRange (start2, end2));
 			matrix.replaceRange(start2, end2, temp);
 		}
 
 		void crossCancel (
 			int row, 
-			int value, 
+			double value, 
 			int pivotRow, 
-			int pivotValue
+			double pivotValue
 		) {
 			final int offset = (pivotRow - row) * cols;
 			for (final int n in range ((row + 1) * cols, start: row * cols))
@@ -168,7 +186,7 @@ class Matrix with IterableMixin <List<int>>{
 		final List<int> pivots = [];
 
 		while (pivotCol < cols && pivotRow < rows) {
-			final List<int> col = getCol (pivotCol);
+			final List<double> col = getCol (pivotCol);
 			final Pivot pivot = getPivot (col.getRange (pivotRow, col.length));
 
 			if (pivot.index == null) {
@@ -182,7 +200,7 @@ class Matrix with IterableMixin <List<int>>{
 			for (final int row in range (rows)) {
 				if (row == pivotRow) continue;
 
-				final int value = matrix [row * cols + pivotCol];
+				final double value = matrix [row * cols + pivotCol];
 				if (value == 0) continue;
 				else crossCancel (row, value, pivotRow, pivot.value);
 			}
@@ -190,12 +208,12 @@ class Matrix with IterableMixin <List<int>>{
 		}
 
 		List<Fraction> result = matrix.map (
-			(int value) => Fraction (value, 1)
+			(double value) => Fraction (value, 1)
 		).toList();
 
 		for (Pair<int> pair in enumerate (pivots)) {
 			final int temp = pair.index * cols + pair.value;
-			final int value = matrix [temp];
+			final double value = matrix [temp];
 			result [temp] = Fraction (1, 1);
 
 
@@ -205,9 +223,15 @@ class Matrix with IterableMixin <List<int>>{
 			) result [index2] = Fraction (matrix [index2], value);
 		}
 
-		return Matrix.fromDimensions(rows, cols, matrix);
+		return Matrix.fromDimensions(rows, cols, result);
 	}
 
+	// List<int> get nullspace {
+	// 	Matrix rref = this.rref;
+	// 	List<Fraction> result = [];
+	// 	for (Pair<Fraction> pair in enumerate (this)) {
 
+	// 	}
+	// }
 
 }
