@@ -3,17 +3,14 @@ import "package:flutter/foundation.dart";
 
 import "element.dart";
 
-import "package:chemistry/helpers/strings.dart";
-import "package:chemistry/helpers/counter.dart";
-import "package:chemistry/helpers/roman.dart" as Roman;
-import "package:chemistry/helpers/names.dart";
+import "../helpers/strings.dart";
+import "../helpers/counter.dart";
+import "../helpers/roman.dart" as Roman;
+import "../helpers/names.dart";
+import "../helpers/range.dart";
 
 import "package:chemistry/constants.dart";
 import "package:chemistry/periodic_table.dart" show periodicTable;
-
-List <int> range (int start, int end) => List.generate (
-	end, (int index) => index + start
-);
 
 int getCoefficient (String text, int index) => isInt (text [index])
 	? getInt (text, index)
@@ -64,8 +61,8 @@ class Molecule {
 			Counter <Element> sub = getElements (match);
 			sub *= coefficient;
 			List <int> indices = range (
-				nestedFormula.start, 
-				nestedFormula.end - 2
+				nestedFormula.end - 2,
+				start: nestedFormula.start 
 			);
 			skips.addAll(indices);
 			subElements += sub;

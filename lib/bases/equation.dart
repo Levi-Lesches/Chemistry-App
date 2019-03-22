@@ -3,6 +3,7 @@ import "element.dart";
 import "molecule.dart";
 import "../helpers/counter.dart";
 import "../helpers/matrix.dart";
+import "../helpers/range.dart";
 
 class Equation {
 	final Side left, right;
@@ -61,24 +62,23 @@ class Equation {
 	
 	bool get balanced => left.elements == right.elements;
 
-
-	void balance() {
-		final List<List<int>> matrix = [];
-		for (CounterEntry<Element> element in elements) {
-			final List<int> row = [];
-			for (CounterEntry<Molecule> molecule in left.molecules) {
-				if (molecule.value.elements.contains(element.value))
-					row.add (-1 * molecule.value.elements [element.value]);
-				else row.add(0);
-			}
-			for (CounterEntry<Molecule> molecule in right.molecules) { 
-				if (molecule.value.elements.contains(element.value)) 
-					row.add (molecule.value.elements [element.value]);
-				else row.add (0);
-			}
-			matrix.add (row);
+	void setCoefficients(List<int> nullspace) {
+		int endIndex;
+		for (final int index in range (left.molecules.length)) {
+			final Molecule molecule = left.molecules.elements [index];
+			left.molecules [molecule] = nullspace [index];
+			endIndex = index;
 		}
 
+		for (final int index2 in range (right.molecules.length)) {
+			final Molecule molecule = right.molecules.elements [index2];
+			right.molecules [molecule] = nullspace [endIndex + index2 + 1];
+		}
+	}
+
+	void balance() {
+		setCoefficients(matrix.nullspace);
+		assert (this.balanced);
 	}
 }
 
