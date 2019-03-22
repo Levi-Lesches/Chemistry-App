@@ -1,8 +1,9 @@
 import "package:chemistry/periodic_table.dart";
 import "package:chemistry/bases/element.dart";
+import "package:chemistry/helpers/range.dart";
 
 void main() {
-	for (int index = 0; index < periodicTable.elements.length; index++) {
+	for (final int index in range (periodicTable.elements.length)) {
 		final int atomicNumber = index + 1;
 		final Element element = periodicTable.elements [index];
 

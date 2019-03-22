@@ -1,3 +1,5 @@
+import "range.dart";
+
 Map <int, String> _letters = {
 	1000: "M",
 	900: "CM",
@@ -45,7 +47,7 @@ toDecimal (String roman) {
 }
 
 bool verify (String roman) {
-	for (int index = 0; index < roman.length; index++) {
+	for (final int index in range (roman.length)) {
 		if (!_letters.containsValue (roman [index])) return false;
 		else if (
 			index < roman.length - 3

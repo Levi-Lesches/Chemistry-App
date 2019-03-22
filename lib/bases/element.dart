@@ -1,5 +1,6 @@
 import "isotope.dart";
 import "package:chemistry/constants.dart";
+import "../helpers/range.dart";
 
 class Element {
 	final int number, electrons, protons, group, period, series;
@@ -36,10 +37,10 @@ class Element {
 
 	String details() {
 		final List <String> energyList = [];
-		for (int index = 0; index < ionEnergy.length; index++) {
+		for (final int index in range (ionEnergy.length)) {
 			if (index != 0 && index % 5 == 0) 
 				energyList.add ("\n" + (" " * 15));
-			energyList.add( ("${ionEnergy [index]}, "));
+			energyList.add ("${ionEnergy [index]}, ");
 		}
 		final String energy = energyList.join (" ");
 

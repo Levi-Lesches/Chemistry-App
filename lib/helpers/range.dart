@@ -1,8 +1,5 @@
 Iterable<int> range(int stop, {int start = 0, int step = 1}) sync* {
-	while (start < stop) {
-		yield start;
-		start += step;
-	}
+	for (int x = start; x < stop; x += step) yield x;
 }
 
 class Pair<T> {
