@@ -27,6 +27,8 @@ class Fraction {
 		return Fraction._ (nom, denom, negative);
 	}
 
+	String toString() => "${negative ? '-' : ''}($nom / $denom)";
+
 	num get toNum => nom / denom * (negative ? -1 : 1);
 }
 
