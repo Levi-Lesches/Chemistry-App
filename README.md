@@ -1,16 +1,14 @@
-# chemistry
+# Chemistry App (Official name TBD):
 
-A new Flutter project.
+A useful app that can analyze chemical formulas and balance chemical equations.
 
-## Getting Started
+## Some examples: 
 
-This project is a starting point for a Flutter application.
+- `CO2 + H2O -> C6H12O6 + O2` gets converted to `6CO2 + 6H2O -> C6H12O6 + 6O2`
 
-A few resources to get you started if this is your first Flutter project:
+- `H2O` will be interpreted as: `Molecule (H2O):`
 
-- [Lab: Write your first Flutter app](https://flutter.io/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.io/docs/cookbook)
-
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.io/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+    - `Elements: {'Hydrogen': 2, 'Oxygen': 1}`
+    - `Mass: 18.01528`
+    - `Type of Molecule: Molecular`
+    - `Name of Molecule: Dihydrogen Monoxide`
