@@ -47,7 +47,6 @@ void testWorksheet() {
 		final Equation equation = Equation (input);
 		compare<bool> (!equation.balanced, true);
 		equation.balance();
-		print (equation);
 		assert (equation.balanced);
 	}
 }
