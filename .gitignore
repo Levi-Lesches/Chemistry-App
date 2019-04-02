@@ -1,0 +1,12 @@
+# NEW RULES: ONLY lib, test, pubspec.yaml, and README.md
+.idea/
+android/
+build/
+coverage/
+ios/
+lib/.tmp.drivedownload
+.metadata
+.packages
+chemistry.iml
+pubspec.lock
+lib/helpers/__pycache__/
