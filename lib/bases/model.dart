@@ -1,8 +1,4 @@
-// import "element.dart";
-
 import "../helpers/range.dart";
-// import "dart:collection";
-// import "periodic_table.dart";
 
 class Node {
 	final String element;
