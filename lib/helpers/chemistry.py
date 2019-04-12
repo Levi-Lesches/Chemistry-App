@@ -1,11 +1,14 @@
 from my_stuff.misc import init
 
+SINGLE = "Single"
+DOUBLE = "Double"
+TRIPLE = "Triple"
+
 class Position: 
 	@init
 	def __init__(self, row = 0, col = 0): pass
 	def __iter__(self): return iter ( (self.row, self.col) )
 	def __repr__(self): return f"Position ({self.row}, {self.col})"
-
 
 class Node: 
 	@init
@@ -18,6 +21,11 @@ class Node:
 		else: 
 			a.bonds.append (b)
 			b.bonds.append (a)
+
+# class Bond: 
+# 	@init
+# 	def __init__(self, element1: str, element2: str, type: str = SINGLE): pass
+
 
 class Matrix: 
 	def __init__(self): self.matrix = {0: []}
