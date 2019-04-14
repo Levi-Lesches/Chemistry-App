@@ -46,6 +46,8 @@ class Matrix:
 		assert pos.row not in self.matrix, f"Row {pos.row} already exists"
 		self.matrix [pos.row] = [None] * pos.col
 
+	def get_rows(self): return iter (self.matrix.values())
+
 
 def paint (nodes): 
 	matrix: Matrix = Matrix()
@@ -54,6 +56,12 @@ def paint (nodes):
 		if current not in matrix: matrix.add_row (current)
 		if matrix.is_valid (current): matrix [current] = pivot
 		else: matrix [current].append (pivot)
+
+		# 
+		for row in matrix.get_rows():
+			# row = matrix.get_row (row)
+			if len (row) < current.col: 
+				row.append (None)
 
 		row, col = current
 		directions: [Position] = None
@@ -122,6 +130,7 @@ def paint (nodes):
 def present(nodes: [Node]): 
 	result = ""
 	temp = paint (nodes)
+	print (temp)
 	for index, (_, row) in enumerate (temp):
 		row_sep = "\n"
 		for index2, node in enumerate (row): 

@@ -4,13 +4,13 @@ import "../compare.dart";
 import "package:flutter_test/flutter_test.dart";
 
 void main() {
-	test ("Basic plotting test: ", modelTest);
+	test ("Model", modelTest);
 }
 
 List<List<String>> toString(List<List<Node>> model) => model.map (
 	(List<Node> row) => row.map (
 		(Node node) => node?.element
-	)
+	).toList()
 ).toList();
 
 void modelTest() {
@@ -82,8 +82,8 @@ List<Node> c2h6() {
 
 List<Node> co2() {
 	final Node c = Node ("C");
-	final Node o1 = Node ("H");
-	final Node o2 = Node ("H");
+	final Node o1 = Node ("O");
+	final Node o2 = Node ("O");
 
 	Node.bond (c, [o1, o2]);
 	return [c, o1, o2];

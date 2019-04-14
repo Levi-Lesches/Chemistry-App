@@ -49,13 +49,15 @@ class Model {
 		);
 		return result.map(
 			(MapEntry<int, List<Node>> entry) => entry.value
-		);
+		).toList();
 	}
 
 	void addRow (Position pos) {
 		assert (!model.containsKey (pos.row), "Row ${pos.row} already exists.");
 		model [pos.row] = List.filled (pos.col, null, growable: true);
 	}
+
+	Iterable<List<Node>> get rows => model.values;
 }
 
 List<List<Node>> paint(List<Node> nodes) {
@@ -65,6 +67,10 @@ List<List<Node>> paint(List<Node> nodes) {
 		if (!model.contains (current)) model.addRow (current);
 		if (model.isValid(current)) model [current] = pivot;
 		else model [current].add (pivot);
+
+		for (final List<Node> row in model.rows) {
+			if (row.length < current.col) row.add (null);
+		}
 
 		final int row = current.row;
 		final int col = current.col;
@@ -96,7 +102,7 @@ List<List<Node>> paint(List<Node> nodes) {
 
 		final List<Node> agenda = pivot.bonds.where(
 			(Node node) => previous == null || node != previous
-		);
+		).toList();
 		agenda.sort(
 			(Node a, Node b) => a.bonds.length.compareTo (b.bonds.length) * -1, 
 		);
