@@ -1,0 +1,11 @@
+.idea
+.metadata
+.packages
+android
+build
+chemistry.iml
+coverage
+ios
+lib/.tmp.drivedownload
+lib/helpers/__pycache__
+pubspec.lock
