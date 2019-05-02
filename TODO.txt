@@ -1,0 +1,12 @@
+Make a dataset: 
+	integrate everything from ELEMENTS.PY (currently in project) and PERIODIC_TABLE.JSON to create the ultimate dataset
+
+	differences: 
+	- currently have: 
+
+		- block
+		- isotopes
+		- oxistates
+		- covrad
+		- atmrad
+		- vdwrad

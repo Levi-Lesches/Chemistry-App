@@ -12,8 +12,8 @@ class Pair<T> {
 	const Pair (this.index, this.value);
 }
 
-Iterable<Pair<E>> enumerate<E> (List<E> list) sync* {
-	for (final int index in range (list.length)) {
-		yield Pair<E> (index, list [index]);
-	}
+Iterable<Pair<E>> enumerate<E> (Iterable<E> list) sync* {
+	int index = 0;
+	for (final E value in list) 
+		yield Pair<E> (index++, value);
 }

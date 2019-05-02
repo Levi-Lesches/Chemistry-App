@@ -1,15 +1,19 @@
+import "package:chemistry/helpers/counter.dart";
+import "package:chemistry/helpers/matrix.dart";
+import "package:chemistry/helpers/range.dart";
+
 import "side.dart";
 import "element.dart";
 import "molecule.dart";
-import "../helpers/counter.dart";
-import "../helpers/matrix.dart";
-import "../helpers/range.dart";
 
 class Equation {
 	final Side left, right;
 	Counter<Element> elements;
+	static final RegExp regex = RegExp (
+		Side.regex.pattern + " --> " + Side.regex.pattern  // haha
+	);
 
-	Equation._ (this.left, this.right) {
+	Equation.fromSides (this.left, this.right) {
 		verify();
 		this.elements = left.elements;  // just cuz
 	}
@@ -19,7 +23,7 @@ class Equation {
 		assert (sides.length == 2, "Equation recieved too many parts: $equation");
 		final Side left = Side (sides [0]);
 		final Side right = Side (sides [1]); 
-		return Equation._(left, right);
+		return Equation.fromSides(left, right);
 	}
 
 	@override String toString() => "$left --> $right";

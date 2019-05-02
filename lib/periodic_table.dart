@@ -1,5 +1,5 @@
-import "bases/element.dart";
-import "bases/isotope.dart";
+import "data/element.dart";
+import "data/isotope.dart";
 
 class PeriodicTable {
   final List <Element> elements;
@@ -15,6 +15,9 @@ class PeriodicTable {
   }
 
   bool contains (Element element) => elements.contains (element);
+  bool containsSymbol (String symbol) => elements.any (
+    (Element element) => element.symbol == symbol
+  );
   
   void forEach (void Function (Element) func) {
     for (Element element in elements) func(element);

@@ -1,13 +1,12 @@
-
 import "package:flutter/foundation.dart";
 
 import "element.dart";
 
-import "../helpers/strings.dart";
-import "../helpers/counter.dart";
-import "../helpers/roman.dart" as Roman;
-import "../helpers/names.dart";
-import "../helpers/range.dart";
+import "package:chemistry/helpers/strings.dart";
+import "package:chemistry/helpers/counter.dart";
+import "package:chemistry/helpers/roman.dart" as Roman;
+import "package:chemistry/helpers/names.dart";
+import "package:chemistry/helpers/range.dart";
 
 import "package:chemistry/constants.dart";
 import "package:chemistry/periodic_table.dart" show periodicTable;
@@ -25,6 +24,7 @@ class Molecule {
 	double mass;
 	MoleculeType type;
 	int coefficient;
+	static final RegExp regex = RegExp ("(\d*)(?:([A-Z][a-z]?)(\d*))+");
 
 	Molecule (this.formula) {
 		elements = getElements();
@@ -72,9 +72,8 @@ class Molecule {
 		final int coefficient = getCoefficient (formula, 0);
 		// group 0: Uppercase -> Maybe (lowercase)
 		// group 1: 0 <= (digit)
-		final RegExp elementRegex = RegExp(r"([A-Z][a-z]?)(\d*)");
 
-		for (final Match match in elementRegex.allMatches (formula)) {
+		for (final Match match in Element.regex.allMatches (formula)) {
 			if (skips.contains (match.start)) continue;
 			final Element element = periodicTable [match.group (1)];
 			final String num = match.group(2);
@@ -157,11 +156,12 @@ class Molecule {
 			return "Unknown (Element count > 10 not supported)";
 
 		String prefix1 = PREFIXES [count1], prefix2 = PREFIXES [count2];
+		if (prefix1 == "Mono") prefix1 = "";
 		String name1 = element1
 			.name
 			.toLowerCase()
 			.replaceFirstMapped (
-				prefix1 [prefix1.length - 1],
+				prefix1.isEmpty ? "" : prefix1 [prefix1.length - 1],
 				(Match match) => match.start == 0
 					? ""
 					: match.group (0)
@@ -172,10 +172,11 @@ class Molecule {
 			.replaceFirst (prefix2 [prefix2.length - 1], "");
 		String baseName = getBaseName (name2);
 
-		if (prefix1 == "Mono") {
-			prefix1 = "";
+		// if (prefix1 == "Mono") {
+		if (prefix1.isEmpty)
+			// prefix1 = "";
 			name1 = title (name1);
-		}
+		// }
 
 		String specialName = polyatomicIons.keys.contains (baseFormula)
 			? " (${polyatomicIons [baseFormula].name})"

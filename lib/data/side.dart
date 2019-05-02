@@ -1,11 +1,12 @@
 import "molecule.dart";
 import "element.dart";
 
-import "../helpers/counter.dart";
+import "package:chemistry/helpers/counter.dart";
 
 class Side {
 	final Counter <Molecule> molecules;
 	Counter <Element> get elements => getElements (molecules);
+	static final RegExp regex = RegExp ("(\d*[A-Z][a-z]?\d*)+( \+ (\d*[A-Z][a-z]?\d*)+)*");
 
 	Side (formula) : molecules = getMolecules (formula);
 
@@ -14,6 +15,9 @@ class Side {
 			"${entry.count == 1 ? '' : entry.count}"
 			"${entry.value.baseFormula}"
 	).join(" + ");
+
+	Side.fromMolecules (Iterable<Molecule> molecules) : 
+		molecules = Counter<Molecule>(molecules);
 
 	static Counter <Molecule> getMolecules(String formula) => Counter.fromMap(
 		Map.fromIterable (

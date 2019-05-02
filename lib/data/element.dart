@@ -1,6 +1,7 @@
 import "isotope.dart";
+
 import "package:chemistry/constants.dart";
-import "../helpers/range.dart";
+import "package:chemistry/helpers/range.dart";
 
 class Element {
 	final int number, electrons, protons, group, period, series;
@@ -10,6 +11,7 @@ class Element {
 	final double mass, eleneg, eleaffin;
 	final double covrad, atmrad, vdwrad;
 	final double tboil, tmelt, density;
+	static final RegExp regex = RegExp ("([A-Z][a-z]?)(\d*)");
 
 	const Element (
 		this.number, 
